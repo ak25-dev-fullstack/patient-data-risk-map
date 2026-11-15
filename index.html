@@ -1,0 +1,624 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Patient Data Risk Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a trace sheet. Overview flow, then one band per table (data, Art 10, Art 14, measures), a trace grid, and sources. Every ID chip traces its links across the page. */
+:root {
+  --bg: #F3F6F6;
+  --surface: #FFFFFF;
+  --surface-2: #E8EFEF;
+  --ink: #12272D;
+  --muted: #546A70;
+  --line: #D3DEDF;
+  --data: #2D62A0;  --data-soft: #E2EBF6;
+  --a10: #0D7769;   --a10-soft: #DCF0EB;
+  --a14: #BE4129;   --a14-soft: #FBE5DE;
+  --m: #946000;     --m-soft: #F6EBD6;
+  --link: #1C5DA6;
+  --on-accent: #FFFFFF;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D191C; --surface: #132428; --surface-2: #1A2F35; --ink: #E4EEEF; --muted: #9AB0B5; --line: #284047;
+    --data: #82B2E8; --data-soft: #192C42; --a10: #52C6B2; --a10-soft: #10362F; --a14: #F28C70; --a14-soft: #43221A;
+    --m: #E4B252; --m-soft: #382A10; --link: #8FC1F6; --on-accent: #0D191C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D191C; --surface: #132428; --surface-2: #1A2F35; --ink: #E4EEEF; --muted: #9AB0B5; --line: #284047;
+  --data: #82B2E8; --data-soft: #192C42; --a10: #52C6B2; --a10-soft: #10362F; --a14: #F28C70; --a14-soft: #43221A;
+  --m: #E4B252; --m-soft: #382A10; --link: #8FC1F6; --on-accent: #0D191C; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+a { color: var(--link); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--a10); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(32px, 5vw, 46px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 28px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); }
+
+/* Header */
+header.top { background: var(--surface); border-bottom: 1px solid var(--line); }
+header.top .wrap { padding-block: 32px 28px; display: grid; gap: 14px; }
+.lead { max-width: 68ch; font-size: 17px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+
+/* Sticky nav */
+nav.sections { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+nav.sections .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: thin; }
+nav.sections a { white-space: nowrap; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+nav.sections a:hover { background: var(--surface-2); }
+
+/* Trace bar */
+.tracebar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 50px); z-index: 4; background: var(--ink); color: var(--bg); }
+.tracebar .wrap { padding-block: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.tracebar .what { font-weight: 600; min-width: 0; }
+.tracebar .groups { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.tracebar .grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 13px; }
+.tracebar .clear { margin-left: auto; background: transparent; color: var(--bg); border: 1px solid currentColor; border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+
+section.band { padding-block: 44px 8px; scroll-margin-top: 64px; }
+.band-head { display: grid; gap: 8px; margin-bottom: 20px; max-width: 78ch; }
+
+/* Chips */
+.chip { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; line-height: 1.6; white-space: nowrap; }
+.chip[data-type="D"] { background: var(--data-soft); color: var(--data); border-color: color-mix(in srgb, var(--data) 35%, transparent); }
+.chip[data-type="R10"] { background: var(--a10-soft); color: var(--a10); border-color: color-mix(in srgb, var(--a10) 35%, transparent); }
+.chip[data-type="R14"] { background: var(--a14-soft); color: var(--a14); border-color: color-mix(in srgb, var(--a14) 35%, transparent); }
+.chip[data-type="M"] { background: var(--m-soft); color: var(--m); border-color: color-mix(in srgb, var(--m) 35%, transparent); }
+.chip:hover { filter: brightness(0.96); }
+.tag { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+
+/* Overview flow */
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; position: relative; }
+.flow a.tile { text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 4px; position: relative; }
+.flow a.tile:hover { border-color: var(--muted); }
+.tile .num { font-family: var(--font-display); font-size: 48px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tile .lab { font-weight: 600; }
+.tile .sub { font-size: 13px; color: var(--muted); }
+.tile.t-D .num { color: var(--data); } .tile.t-R10 .num { color: var(--a10); } .tile.t-R14 .num { color: var(--a14); } .tile.t-M .num { color: var(--m); }
+.flow a.tile:not(:last-child)::after { content: ""; position: absolute; right: -12px; top: 50%; width: 10px; height: 10px; border-top: 2px solid var(--muted); border-right: 2px solid var(--muted); transform: translateY(-50%) rotate(45deg); }
+.coverage { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; }
+.coverage strong { font-variant-numeric: tabular-nums; }
+
+/* Data pipeline diagram */
+.pipe { display: grid; grid-template-columns: minmax(0, 1.3fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr); gap: 10px; align-items: stretch; margin-bottom: 22px; }
+.pipe .stage { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.pipe .stage .eyebrow { font-size: 11px; }
+.pipe .node { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--data-soft); border-radius: 8px; min-width: 0; }
+.pipe .node span:last-child { font-size: 14px; font-weight: 500; }
+.pipe .arrow { display: grid; place-items: center; color: var(--muted); }
+.pipe .arrow svg { width: 22px; height: 22px; }
+
+/* Card grids */
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 14px; display: grid; gap: 10px; align-content: start; min-width: 0; transition: opacity .15s, box-shadow .15s; }
+.card .head { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.card .head h3 { min-width: 0; }
+.card .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.card .label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); min-width: 64px; }
+.card .ev { display: grid; gap: 4px; font-size: 14px; padding-left: 0; margin: 0; list-style: none; }
+.card .ev li { padding-left: 14px; position: relative; }
+.card .ev li::before { content: ""; position: absolute; left: 2px; top: 0.7em; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
+.card .note { font-size: 14px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); }
+.card .note b { font-weight: 600; }
+.risk-text { font-size: 15px; }
+.inference { font-style: italic; color: var(--muted); }
+
+/* Timing pills for data groups */
+.timing { display: flex; gap: 4px; flex-wrap: wrap; }
+.timing span { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--muted); }
+.timing span.on { background: var(--data); color: var(--on-accent); }
+
+/* Paragraph lights */
+.lights { display: flex; flex-wrap: wrap; gap: 3px; }
+.light { font-family: var(--font-mono); font-size: 11px; font-weight: 600; min-width: 30px; height: 24px; padding: 0 5px; border-radius: 5px; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); }
+.lights.a10 .light.on { background: var(--a10); color: var(--on-accent); }
+.lights.a14 .light.on { background: var(--a14); color: var(--on-accent); }
+.extra { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+/* Legend */
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 18px; margin-bottom: 18px; font-size: 13.5px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.legend div { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.legend .light { flex: none; }
+.legend-foot { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
+
+/* Measures */
+.m-title { font-weight: 600; }
+
+/* Tracing state */
+body.tracing .card:not(.hit) { opacity: 0.32; }
+.card.hit { box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 55%, transparent); }
+.card.sel { box-shadow: 0 0 0 3px var(--ink); }
+
+/* Matrix */
+.mx-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+table.mx { border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 860px; width: 100%; }
+table.mx th, table.mx td { padding: 0; text-align: center; border-bottom: 1px solid var(--line); }
+table.mx thead th { padding: 10px 2px 8px; vertical-align: bottom; position: sticky; top: 0; background: var(--surface); }
+table.mx thead th.grp { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 6px 2px; border-bottom: none; }
+table.mx thead th.grp.a10 { color: var(--a10); } table.mx thead th.grp.a14 { color: var(--a14); }
+table.mx th.rowh { text-align: left; padding: 6px 12px; white-space: nowrap; position: sticky; left: 0; background: var(--surface); z-index: 1; font-weight: 400; }
+table.mx th.rowh .chip { margin-right: 8px; }
+table.mx td { height: 34px; min-width: 40px; }
+table.mx td.split, table.mx th.split { border-left: 2px solid var(--line); }
+table.mx tr.sep th, table.mx tr.sep td { border-top: 2px solid var(--line); }
+.dot { display: inline-block; width: 13px; height: 13px; border-radius: 50%; }
+tr.r-D .dot { background: var(--data); }
+tr.r-M .dot { background: var(--m); }
+table.mx .colh .chip { writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 2px; font-size: 11.5px; }
+body.tracing table.mx tr.mx-row:not(.hit) th.rowh, body.tracing table.mx tr.mx-row:not(.hit) td { opacity: 0.35; }
+body.tracing table.mx th.colh:not(.hit) { opacity: 0.35; }
+.mx-key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+.mx-key span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Sources */
+.src-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.src-col { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.src-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
+.src-col li { display: grid; gap: 1px; min-width: 0; }
+.src-col li .dom { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+
+footer { padding-block: 40px 56px; font-size: 13px; color: var(--muted); }
+footer .wrap { display: grid; gap: 6px; max-width: 1180px; }
+
+@media (max-width: 860px) {
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow a.tile::after { display: none; }
+  .pipe { grid-template-columns: minmax(0, 1fr); }
+  .pipe .arrow svg { transform: rotate(90deg); }
+}
+@media (max-width: 480px) {
+  .grid, .src-grid { grid-template-columns: minmax(0, 1fr); }
+  .tracebar { top: calc(env(safe-area-inset-top, 0px) + 50px); }
+  body { font-size: 14.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Coursework 1 · EU AI Act Articles 10 and 14</div>
+    <h1>Patient Data Risk Map</h1>
+    <p class="lead">What an AI patient monitoring system collects, where that data goes wrong under Articles 10 and 14, and the measures that answer each risk. Click any ID to trace it across the page.</p>
+    <div class="meta">
+      <span>Research as of 30 October 2026</span>
+      <span>Page made 15 November 2026</span>
+      <span>From <a href="https://claude.ai/artifact/YQkkzCHewnrutZDU41JdtW" target="_blank" rel="noopener">Patient Monitoring Data – UK &amp; EU Research</a></span>
+    </div>
+  </div>
+</header>
+
+<nav class="sections" aria-label="Sections">
+  <div class="wrap">
+    <a href="#overview">Overview</a>
+    <a href="#data">Data collected</a>
+    <a href="#art10">Article 10 risks</a>
+    <a href="#art14">Article 14 risks</a>
+    <a href="#measures">Measures</a>
+    <a href="#grid">Trace grid</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<div class="tracebar" id="tracebar" hidden>
+  <div class="wrap">
+    <div class="what" id="trace-what"></div>
+    <div class="groups" id="trace-groups"></div>
+    <button class="clear" id="trace-clear" type="button">Clear trace</button>
+  </div>
+</div>
+
+<main>
+  <section class="band" id="overview">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Overview</div>
+        <h2>Seven data groups, sixteen risks, eleven measures</h2>
+        <p class="muted">Read left to right: what is collected, what can go wrong with it under each article, and what the system does about it.</p>
+      </div>
+      <div class="flow" id="flow"></div>
+      <div class="coverage" id="coverage"></div>
+    </div>
+  </section>
+
+  <section class="band" id="data">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Table 1 · Data typically collected</div>
+        <h2>What the system collects</h2>
+        <p class="muted">Current data (observations, device streams) is combined with the longitudinal record. D7 is data the system itself creates and must track.</p>
+      </div>
+      <div class="pipe" id="pipe"></div>
+      <div class="grid" id="data-grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="art10">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Table 2 · Article 10, data and data governance</div>
+        <h2>Data risks against Article 10</h2>
+        <p class="muted">Article 10 governs training, validation and test data. Once live, the deployer must keep input data relevant and representative where it controls it (<a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-26" target="_blank" rel="noopener">Art 26(4)</a>). Lit cells show which paragraphs each risk touches.</p>
+      </div>
+      <div class="legend" id="legend10"></div>
+      <div class="grid" id="r10-grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="art14">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Table 3 · Article 14, human oversight</div>
+        <h2>Data-related risks against Article 14</h2>
+        <p class="muted">Oversight fails when clinicians cannot see what data a prediction rests on, how fresh it is, or how reliable it is. Lit cells show which Article 14(4) capabilities each risk threatens.</p>
+      </div>
+      <div class="legend" id="legend14"></div>
+      <div class="grid" id="r14-grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="measures">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Table 4 · Measures</div>
+        <h2>Measures the system should take</h2>
+        <p class="muted">Each measure names the risks it answers, so the chain runs article → risk → measure → source.</p>
+      </div>
+      <div class="grid" id="m-grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="grid">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Trace grid</div>
+        <h2>Which data feeds each risk, and which measure answers it</h2>
+        <p class="muted">Columns are the sixteen risks. Blue dots show the data groups a risk involves; amber dots show the measures that answer it. Click any ID to trace.</p>
+      </div>
+      <div class="mx-wrap"><table class="mx" id="mx"></table></div>
+      <div class="mx-key">
+        <span><i class="dot" style="background:var(--data)"></i> data group involved</span>
+        <span><i class="dot" style="background:var(--m)"></i> measure answers the risk</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="sources">
+    <div class="wrap">
+      <div class="band-head">
+        <div class="eyebrow">Sources</div>
+        <h2>Where every claim comes from</h2>
+        <p class="muted">Primary legal text and standards first. Commentary is listed separately and used for interpretation only. Check each link before citing it.</p>
+      </div>
+      <div class="src-grid" id="src-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Built from the four tables in <a href="https://claude.ai/artifact/YQkkzCHewnrutZDU41JdtW" target="_blank" rel="noopener">Patient Monitoring Data – UK &amp; EU Research</a>. EU AI Act references follow the consolidated text as at 27 July 2026, after the Digital Omnibus (Reg. 2026/1744).</span>
+    <span>Sources were found through AI-assisted literature searching. Write submitted text in your own words, as the brief's Tier 2 AI rules require.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const U = {
+    art4a: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-4a",
+    art10: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-10",
+    art14: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-14",
+    art26: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-26",
+    eurlex: "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02024R1689-20260727",
+    snomed: "https://standards.nhs.uk/published-standards/snomed-ct",
+    dmd: "https://standards.nhs.uk/published-standards/dictionary-of-medicines-and-devices",
+    ukcore: "https://standards.nhs.uk/published-standards/uk-core-fhir-release-4-governance",
+    news2: "https://www.rcp.ac.uk/media/ctulqqbn/news2-executive-summary_0.pdf",
+    ieee11073: "https://scc-ccn.ca/standardsdb/standards/8188787",
+    iso5259: "https://committee.iso.org/standard/81088.html",
+    caldicott: "https://www.gov.uk/government/publications/the-caldicott-principles",
+    nhsregs: "https://digitalregulations.innovation.nhs.uk/regulations-and-guidance-for-adopters/all-adopters-guidance/complying-with-the-uk-gdpr-steps-1-7-an-introduction/step-4-comply-with-article-6-and-9-of-uk-gdpr/",
+    optout: "https://www.nhs.uk/your-nhs-data-matters/manage-your-choice/",
+    wales: "https://www.gov.wales/sites/default/files/publications/2019-08/introduction-of-snomed-ct-as-an-information-standard-in-nhs-wales.pdf",
+    casrai: "https://casrai.org/guides/modified-early-warning-score",
+    agniel: "https://www.bmj.com/content/361/bmj.k1479.abstract",
+    schmidt: "https://qualitysafety.bmj.com/content/24/1/10",
+    goddard: "https://academic.oup.com/jamia/article/19/1/121/732254",
+    tomasev: "https://research.google/pubs/a-clinically-applicable-approach-to-continuous-prediction-of-future-acute-kidney-injury/",
+    vaFollow: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10751025",
+    epic: "https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/2781313",
+    finlayson: "https://doi.org/10.1056/NEJMc2104626",
+    standing: "https://research.google/pubs/standing-together-standards-for-data-diversity-inclusivity-and-generalisability-in-health-datasets/",
+    equity: "https://www.gov.uk/government/publications/equity-in-medical-devices-independent-review-final-report/equity-in-medical-devices-independent-review-quick-read",
+    streams: "https://www.digitalhealth.net/2017/07/royal-free-and-deepmind-did-not-comply-with-dpa-ico/",
+    hsf: "https://www.hsfkramer.com/notes/data/2017-07/google-deepmind-trial-failed-to-comply-with-data-protection-law",
+    hitn: "https://www.healthcareitnews.com/news/research-suggests-epic-sepsis-model-lacking-predictive-power",
+    mayo: "https://www.mayoclinicplatform.org/?p=426",
+    pj: "https://pharmaceutical-journal.com/article/news/government-accepts-all-44-recommendations-from-regulation-of-ai-in-healthcare-report"
+  };
+
+  const ALL_D = ["D1", "D2", "D3", "D4", "D5", "D6", "D7"];
+  const DATA = [
+    { id: "D1", name: "Demographics and identifiers", content: "NHS number, age, sex, ethnicity, postcode", timing: ["history", "live"], timingText: "Both", std: [{ t: "NHS Data Model and Dictionary" }], note: "Ethnicity is special category data; needed for bias checks (Art 4a)." },
+    { id: "D2", name: "EHR clinical record", content: "Diagnoses and problems, medicines, allergies, procedures, free-text notes", timing: ["history"], timingText: "Mostly historical", std: [{ t: "SNOMED CT", u: U.snomed }, { t: "dm+d", u: U.dmd }], note: "Coding changes over time (Read codes to SNOMED CT)." },
+    { id: "D3", name: "Clinical observations", content: "NEWS2 set: respiration rate, SpO2 (Scale 1 or 2), air or oxygen, systolic BP, pulse, consciousness (ACVPU / new confusion), temperature", timing: ["live", "history"], timingText: "Current + recent trend", std: [{ t: "RCP NEWS2 (2017)", u: U.news2 }], note: "Manual entry errors; an unrecorded parameter adds nothing to the total, so the score can look falsely low." },
+    { id: "D4", name: "Laboratory results", content: "Value, units, reference range, order time, result time", timing: ["history", "live"], timingText: "Both", std: [{ t: "SNOMED CT (UK Pathology Extension)", u: U.snomed }, { t: "HL7 v2 / FHIR" }], note: "Order timing itself predicts outcome (process bias)." },
+    { id: "D5", name: "Monitoring devices", content: "Bedside monitors (HR, SpO2, BP, RR, ECG), home and wearable devices; device ID and settings", timing: ["live"], timingText: "Current, high frequency", std: [{ t: "ISO/IEEE 11073 incl. SDC (11073-10700:2024)", u: U.ieee11073 }], note: "Sensor bias (pulse oximetry), artefact, dropout." },
+    { id: "D6", name: "Care-process context", content: "Who recorded, when, where (ward, home), monitoring frequency, orders and requests", timing: ["history", "live"], timingText: "Both", std: [{ t: "FHIR Provenance / audit metadata" }], note: "Drives missingness and staleness." },
+    { id: "D7", name: "System-generated records", content: "AI output, confidence, contributing factors, alerts, clinician actions (acknowledge, override, escalate), access logs", timing: ["generated"], timingText: "Generated by the system", std: [{ t: "FHIR UK Core", u: U.ukcore }, { t: "local audit" }], note: "Core evidence for Art 14 oversight and traceability." }
+  ];
+
+  const P10 = [
+    ["2a", "10(2)(a)", "Relevant design choices"],
+    ["2b", "10(2)(b)", "Collection, origin and original purpose of data"],
+    ["2c", "10(2)(c)", "Preparation: annotation, labelling, cleaning, updating"],
+    ["2d", "10(2)(d)", "Assumptions about what the data measures"],
+    ["2e", "10(2)(e)", "Availability, quantity and suitability"],
+    ["2f", "10(2)(f)", "Examination for biases, especially where outputs feed future inputs"],
+    ["2g", "10(2)(g)", "Measures to detect, prevent and mitigate those biases"],
+    ["2h", "10(2)(h)", "Data gaps or shortcomings and how to address them"],
+    ["3", "10(3)", "Relevant, representative, as error-free and complete as possible"],
+    ["4", "10(4)", "Fits the geographical, contextual, behavioural or functional setting"]
+  ];
+  const P14 = [
+    ["a", "14(4)(a)", "Understand capacities and limits; monitor; detect anomalies"],
+    ["b", "14(4)(b)", "Stay aware of automation bias"],
+    ["c", "14(4)(c)", "Correctly interpret the output"],
+    ["d", "14(4)(d)", "Decide not to use, disregard, override or reverse"],
+    ["e", "14(4)(e)", "Intervene or stop the system in a safe state"]
+  ];
+
+  const RISKS = [
+    { id: "R10-1", art: 10, text: "Training population differs from patients the system will monitor (sex, ethnicity, age, care setting).", data: ["D1", "D2"], paras: ["3", "4"], paraText: "10(3), 10(4)", ev: [{ t: "VA kidney injury model trained on a 94% male population", u: U.vaFollow }, { t: "STANDING Together dataset standards", u: U.standing }] },
+    { id: "R10-2", art: 10, text: "Device measurement bias: a sensor reads differently across groups.", data: ["D5"], paras: ["2d", "2f", "2g"], paraText: "10(2)(d), (f), (g)", ev: [{ t: "Pulse oximeters overestimate oxygen more in darker skin (Equity review)", u: U.equity }] },
+    { id: "R10-3", art: 10, text: "Process bias and feedback loop: test orders and timing reflect clinician concern; AI alerts then trigger more tests that feed the next prediction.", data: ["D4", "D6"], paras: ["2d", "2f"], paraText: "10(2)(d), 10(2)(f): “data outputs influence inputs for future operations”", ev: [{ t: "Agniel et al., BMJ 2018", u: U.agniel }] },
+    { id: "R10-4", art: 10, text: "Historical inconsistency: codes and scores changed over time (Read to SNOMED CT; NEWS to NEWS2; local MEWS thresholds).", data: ["D2", "D3"], paras: ["2c", "2h"], paraText: "10(2)(c), 10(2)(h)", ev: [{ t: "Read codes to SNOMED CT (Welsh Government notice)", u: U.wales }, { t: "NEWS to NEWS2 changes (RCP 2017)", u: U.news2 }, { t: "MEWS thresholds never centrally standardised", u: U.casrai }] },
+    { id: "R10-5", art: 10, text: "Dataset shift after go-live: new devices, EHR upgrades, population or practice change.", data: ALL_D, paras: ["4", "2h"], paraText: "10(4), 10(2)(h)", ev: [{ t: "Finlayson et al., NEJM 2021: technology, population/setting and behaviour shifts", u: U.finlayson }, { t: "Summary of Finlayson et al.", u: U.mayo }] },
+    { id: "R10-6", art: 10, text: "Unclear origin or purpose of reused records (direct-care data reused for training).", data: ["D1", "D2", "D3", "D4", "D5", "D6"], paras: ["2b"], paraText: "10(2)(b)", ev: [{ t: "Streams ICO ruling (2017)", u: U.streams }, { t: "National data opt-out", u: U.optout }] },
+    { id: "R10-7", art: 10, text: "Missing or erroneous entries: manual charting, absent parameters, device dropout.", data: ["D3", "D5"], paras: ["3"], paraText: "10(3): errors, completeness", ev: [{ t: "Electronic capture introduced to improve accuracy and reliability of vital signs (Schmidt et al. 2015)", u: U.schmidt }] },
+    { id: "R10-8", art: 10, text: "Bias testing needs ethnicity data, but its use is tightly limited.", data: ["D1"], paras: ["2f", "2g"], paraText: "10(2)(f)–(g) + Art 4a", ev: [{ t: "Article 4a conditions", u: U.art4a }] },
+    { id: "R14-1", art: 14, text: "Automation bias: staff accept the score without checking the underlying data.", data: ["D3", "D4", "D5", "D6", "D7"], paras: ["b"], paraText: "14(4)(b)", ev: [{ t: "Incorrect advice can lead users to reverse a correct decision (Goddard et al., JAMIA 2012)", u: U.goddard }] },
+    { id: "R14-2", art: 14, text: "Alert fatigue: too many alerts, so real ones are ignored.", data: ["D7"], paras: ["a", "b"], paraText: "14(4)(a)–(b)", ev: [{ t: "Epic model alerted on 18% of all patients yet missed 67% of sepsis (JAMA IM)", u: U.epic }] },
+    { id: "R14-3", art: 14, text: "Stale or missing inputs are invisible: the score rests on old observations or absent labs.", data: ["D3", "D4", "D6"], paras: ["a", "c"], paraText: "14(4)(a), (c)", ev: [{ t: "Design inference from 14(4)(c) and D6" }] },
+    { id: "R14-4", art: 14, text: "Opaque output: a number with no confidence or contributing factors.", data: ["D7"], paras: ["c"], paraText: "14(4)(c)", ev: [{ t: "Epic model criticised as proprietary and opaque", u: U.hitn }, { t: "VA model showed confidence and key features (Tomašev et al.)", u: U.tomasev }] },
+    { id: "R14-5", art: 14, text: "Known input limits not shown at point of care (e.g. oximetry and skin tone; NEWS reliability in spinal cord injury).", data: ["D3", "D5"], paras: ["a"], paraText: "14(4)(a)", ev: [{ t: "Equity in Medical Devices review", u: U.equity }, { t: "RCP NEWS2", u: U.news2 }] },
+    { id: "R14-6", art: 14, text: "Overrides and actions not recorded, so anomalies and drift go unseen.", data: ["D7"], paras: ["a", "d"], paraText: "14(4)(a), (d); Art 26(5)–(6)", ev: [{ t: "Deployers must monitor operation and keep logs for at least 6 months (Art 26)", u: U.art26 }] },
+    { id: "R14-7", art: 14, text: "Oversight given to staff without the competence, training or authority to act.", data: [], paras: [], paraText: "14(4) overall; Art 26(2)", ev: [{ t: "Art 26(2)", u: U.art26 }, { t: "UK Commission: professionals need clarity on responsibilities", u: U.pj }] },
+    { id: "R14-8", art: 14, text: "No safe state when a data feed fails or is incomplete.", data: ["D3", "D4", "D5"], paras: ["e"], paraText: "14(4)(e)", ev: [{ t: "Design inference from 14(4)(e)" }] }
+  ];
+
+  const MEASURES = [
+    { id: "M1", title: "Dataset register", text: "For each training, validation and test set, record source, period, original purpose, lawful basis, population breakdown and coding version.", ans: ["R10-1", "R10-4", "R10-6"], art: "10(2)(a)–(b), (e), (h)", src: [{ t: "STANDING Together", u: U.standing }, { t: "ISO/IEC 5259 series", u: U.iso5259 }] },
+    { id: "M2", title: "Separate care data from training data", text: "Lawful basis and DPIA before data moves; pseudonymise training extracts; apply national data opt-outs; DSPT in place.", ans: ["R10-6"], art: "10(2)(b); GDPR Art 9, 35; Art 26(9)", src: [{ t: "ICO Streams ruling", u: U.hsf }, { t: "NHS AI & Digital Regulations Service", u: U.nhsregs }] },
+    { id: "M3", title: "Subgroup testing", text: "Report performance by sex, age band, ethnicity and device type; use ethnicity only under Art 4a safeguards.", ans: ["R10-1", "R10-2", "R10-8"], art: "10(2)(f)–(g); 4a", src: [{ t: "Equity review", u: U.equity }, { t: "Art 4a", u: U.art4a }] },
+    { id: "M4", title: "Historical version control", text: "Map Read codes to SNOMED CT; tag each score with its definition (MEWS / NEWS / NEWS2); store terminology version with each record.", ans: ["R10-4"], art: "10(2)(c)", src: [{ t: "SNOMED CT standard", u: U.snomed }, { t: "UK Core", u: U.ukcore }] },
+    { id: "M5", title: "Runtime input-quality gate", text: "Check completeness, plausibility and freshness of each input before predicting; flag or withhold output when below threshold.", ans: ["R10-7", "R14-3", "R14-8"], art: "10(3); 26(4); 14(4)(a), (e)", src: [{ t: "ISO/IEC 5259 series", u: U.iso5259 }, { t: "design inference" }] },
+    { id: "M6", title: "Provenance on every data point", text: "Source system, device ID, who recorded it, measured-at and recorded-at times.", ans: ["R10-3", "R10-7", "R14-3"], art: "10(2)(b), (d); 14(4)(c)", src: [{ t: "Agniel et al.", u: U.agniel }, { t: "ISO/IEEE 11073 (device data)", u: U.ieee11073 }] },
+    { id: "M7", title: "Local validation and drift monitoring", text: "Validate on local data before go-live; track performance, input distributions and alert rate per ward over time.", ans: ["R10-5", "R14-2"], art: "10(4), 10(2)(h); 26(5)", src: [{ t: "Epic validation", u: U.epic }, { t: "Finlayson et al.", u: U.finlayson }] },
+    { id: "M8", title: "Explanation panel beside each output", text: "Contributing data, data age, missing items, confidence, known input limits.", ans: ["R14-1", "R14-3", "R14-4", "R14-5"], art: "14(4)(a)–(c)", src: [{ t: "Tomašev et al.", u: U.tomasev }, { t: "Goddard et al.", u: U.goddard }] },
+    { id: "M9", title: "Structured action capture", text: "Record acknowledge, override, escalate and the reason as data; keep logs at least 6 months; exclude AI-triggered tests when retraining, or label them.", ans: ["R14-6", "R10-3"], art: "14(4)(d); 26(5)–(6); 10(2)(f)", src: [{ t: "Art 26", u: U.art26 }] },
+    { id: "M10", title: "Oversight roles and access", text: "Only trained, authorised clinicians act on outputs; need-to-know access.", ans: ["R14-7"], art: "14(4); 26(2)", src: [{ t: "Art 26(2)", u: U.art26 }, { t: "Caldicott Principles", u: U.caldicott }] },
+    { id: "M11", title: "Safe-state fallback", text: "If inputs fail M5, revert to standard NEWS2 escalation and tell staff the AI output is unavailable.", ans: ["R14-8"], art: "14(4)(e)", src: [{ t: "RCP NEWS2", u: U.news2 }, { t: "design inference" }] }
+  ];
+
+  const SOURCES = [
+    { h: "EU law (primary)", items: [
+      ["EU AI Act, consolidated text as at 27 July 2026", U.eurlex],
+      ["Article 10: Data and data governance", U.art10],
+      ["Article 14: Human oversight", U.art14],
+      ["Article 26: Obligations of deployers", U.art26],
+      ["Article 4a: Special-category data for bias detection", U.art4a]
+    ]},
+    { h: "UK standards and guidance", items: [
+      ["SNOMED CT (NHS published standard)", U.snomed],
+      ["Dictionary of Medicines and Devices (dm+d)", U.dmd],
+      ["HL7 FHIR UK Core governance", U.ukcore],
+      ["RCP NEWS2 executive summary (2017)", U.news2],
+      ["ISO/IEEE 11073-10700:2024 (device connectivity)", U.ieee11073],
+      ["ISO/IEC 5259 data quality for ML", U.iso5259],
+      ["Caldicott Principles (2020)", U.caldicott],
+      ["NHS AI & Digital Regulations Service: UK GDPR step 4", U.nhsregs],
+      ["NHS national data opt-out", U.optout],
+      ["Welsh Government: SNOMED CT notice", U.wales],
+      ["Equity in medical devices review (DHSC 2024)", U.equity]
+    ]},
+    { h: "Research evidence (peer reviewed)", items: [
+      ["Agniel, Kohane & Weber (2018) BMJ: process bias in EHR data", U.agniel],
+      ["Schmidt et al. (2015) BMJ Qual Saf: VitalPAC", U.schmidt],
+      ["Goddard, Roudsari & Wyatt (2012) JAMIA: automation bias", U.goddard],
+      ["Tomašev et al. (2019) Nature: AKI prediction", U.tomasev],
+      ["Cao et al. (2022): AKI model generalisability", U.vaFollow],
+      ["Epic Sepsis Model validation, JAMA IM 2021", U.epic],
+      ["Finlayson et al. (2021) NEJM: dataset shift", U.finlayson],
+      ["STANDING Together (2025) Lancet Digital Health", U.standing]
+    ]},
+    { h: "Commentary and reporting (context only)", items: [
+      ["Digital Health: Streams ICO ruling (2017)", U.streams],
+      ["Herbert Smith Freehills: Streams ruling (2017)", U.hsf],
+      ["Healthcare IT News: Epic Sepsis Model (2021)", U.hitn],
+      ["Mayo Clinic Platform: dataset shift summary", U.mayo],
+      ["CASRAI: MEWS standardisation", U.casrai],
+      ["Pharmaceutical Journal: UK AI Commission (2026)", U.pj]
+    ]}
+  ];
+
+  const ALL = {};
+  DATA.forEach((d) => (ALL[d.id] = d));
+  RISKS.forEach((r) => (ALL[r.id] = r));
+  MEASURES.forEach((m) => (ALL[m.id] = m));
+
+  const typeOf = (id) => (id.startsWith("D") ? "D" : id.startsWith("R10") ? "R10" : id.startsWith("R14") ? "R14" : "M");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const chip = (id) => `<button type="button" class="chip" data-type="${typeOf(id)}" data-trace="${id}" title="Trace ${id}">${id}</button>`;
+  const link = (o) => (o.u ? `<a href="${o.u}" target="_blank" rel="noopener">${esc(o.t)}</a>` : `<span class="inference">${esc(o.t)}</span>`);
+  const dom = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } };
+
+  // Overview
+  const counts = [
+    ["D", DATA.length, "Data groups", "EHR, observations, labs, devices, context, system records", "#data"],
+    ["R10", RISKS.filter((r) => r.art === 10).length, "Article 10 risks", "Data and data governance", "#art10"],
+    ["R14", RISKS.filter((r) => r.art === 14).length, "Article 14 risks", "Human oversight", "#art14"],
+    ["M", MEASURES.length, "Measures", "Design responses, traced to risks", "#measures"]
+  ];
+  document.getElementById("flow").innerHTML = counts.map((c) =>
+    `<a class="tile t-${c[0]}" href="${c[4]}"><span class="num">${c[1]}</span><span class="lab">${c[2]}</span><span class="sub">${c[3]}</span></a>`).join("");
+  const answered = RISKS.filter((r) => MEASURES.some((m) => m.ans.includes(r.id)));
+  const dataUsed = DATA.filter((d) => RISKS.some((r) => r.data.includes(d.id)));
+  const mostRisky = DATA.map((d) => [d.id, RISKS.filter((r) => r.data.includes(d.id)).length]).sort((a, b) => b[1] - a[1])[0];
+  document.getElementById("coverage").innerHTML =
+    `<span><strong>${answered.length} of ${RISKS.length}</strong> risks answered by at least one measure</span>` +
+    `<span><strong>${dataUsed.length} of ${DATA.length}</strong> data groups involved in at least one risk</span>` +
+    `<span>Most exposed data group: ${chip(mostRisky[0])} in <strong>${mostRisky[1]}</strong> risks</span>`;
+
+  // Data pipeline
+  const arrow = `<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13M13 6l6 6-6 6"/></svg></div>`;
+  const node = (id, label) => `<div class="node">${chip(id)}<span>${label}</span></div>`;
+  document.getElementById("pipe").innerHTML =
+    `<div class="stage"><div class="eyebrow">Sources feed in</div>${node("D2", "EHR clinical record")}${node("D3", "Clinical observations")}${node("D4", "Laboratory results")}${node("D5", "Monitoring devices")}</div>` +
+    arrow +
+    `<div class="stage"><div class="eyebrow">Joined into one patient view</div>${node("D1", "Identifiers link the sources")}${node("D6", "Context: who, when, where")}</div>` +
+    arrow +
+    `<div class="stage"><div class="eyebrow">System creates</div>${node("D7", "AI output, alerts and clinician actions")}</div>`;
+
+  // Data cards
+  const timingPills = (d) => {
+    const all = [["history", "History"], ["live", "Live"], ["generated", "Generated"]];
+    return `<div class="timing" title="${esc(d.timingText)}">${all.map(([k, l]) => `<span class="${d.timing.includes(k) ? "on" : ""}">${l}</span>`).join("")}</div>`;
+  };
+  document.getElementById("data-grid").innerHTML = DATA.map((d) => {
+    const risks = RISKS.filter((r) => r.data.includes(d.id)).map((r) => r.id);
+    return `<article class="card" data-id="${d.id}" id="${d.id}">
+      <div class="head">${chip(d.id)}<h3>${esc(d.name)}</h3></div>
+      <p>${esc(d.content)}</p>
+      <div class="row"><span class="label">When</span>${timingPills(d)}<span class="tag">${esc(d.timingText)}</span></div>
+      <div class="row"><span class="label">Standard</span><span>${d.std.map(link).join(", ")}</span></div>
+      <p class="note"><b>Art 10 / 14 note:</b> ${esc(d.note)}</p>
+      <div class="row"><span class="label">Risks</span>${risks.map(chip).join("")}</div>
+    </article>`;
+  }).join("");
+
+  // Legends
+  const legend = (P, cls, art, url) => P.map(([k, label, desc]) =>
+    `<div><span class="light on" style="background:var(--${cls});color:var(--on-accent)">${k}</span><span><span class="mono">${label}</span> ${esc(desc)}</span></div>`).join("") +
+    `<p class="legend-foot">Paraphrased from <a href="${url}" target="_blank" rel="noopener">Article ${art}</a> (EC AI Act Service Desk, consolidated text).</p>`;
+  document.getElementById("legend10").innerHTML = legend(P10, "a10", 10, U.art10);
+  document.getElementById("legend14").innerHTML = legend(P14, "a14", 14, U.art14);
+
+  // Risk cards
+  const lights = (r) => {
+    const P = r.art === 10 ? P10 : P14;
+    return `<div class="lights a${r.art}">${P.map(([k, label, desc]) => `<span class="light ${r.paras.includes(k) ? "on" : ""}" title="${label}: ${esc(desc)}">${k}</span>`).join("")}</div>`;
+  };
+  const riskCard = (r) => {
+    const ms = MEASURES.filter((m) => m.ans.includes(r.id)).map((m) => m.id);
+    const dataRow = r.data.length === DATA.length ? `${r.data.map(chip).join("")}<span class="tag">all groups</span>` : r.data.length ? r.data.map(chip).join("") : `<span class="muted">Not tied to one data group</span>`;
+    return `<article class="card" data-id="${r.id}" id="${r.id}">
+      <div class="head">${chip(r.id)}</div>
+      <p class="risk-text">${esc(r.text)}</p>
+      <div class="row"><span class="label">Data</span>${dataRow}</div>
+      <div class="row"><span class="label">Article</span>${lights(r)}</div>
+      <div class="extra">${esc(r.paraText)}</div>
+      <div class="row" style="align-items:flex-start"><span class="label">Evidence</span><ul class="ev">${r.ev.map((e) => `<li>${link(e)}</li>`).join("")}</ul></div>
+      <div class="row"><span class="label">Measures</span>${ms.map(chip).join("")}</div>
+    </article>`;
+  };
+  document.getElementById("r10-grid").innerHTML = RISKS.filter((r) => r.art === 10).map(riskCard).join("");
+  document.getElementById("r14-grid").innerHTML = RISKS.filter((r) => r.art === 14).map(riskCard).join("");
+
+  // Measure cards
+  document.getElementById("m-grid").innerHTML = MEASURES.map((m) => `<article class="card" data-id="${m.id}" id="${m.id}">
+      <div class="head">${chip(m.id)}<h3>${esc(m.title)}</h3></div>
+      <p>${esc(m.text)}</p>
+      <div class="row"><span class="label">Answers</span>${m.ans.map(chip).join("")}</div>
+      <div class="row"><span class="label">Article</span><span class="mono" style="font-size:13px">${esc(m.art)}</span></div>
+      <div class="row"><span class="label">Source</span><span>${m.src.map(link).join("; ")}</span></div>
+    </article>`).join("");
+
+  // Matrix
+  const r10 = RISKS.filter((r) => r.art === 10), r14 = RISKS.filter((r) => r.art === 14);
+  const cols = r10.concat(r14);
+  let html = `<thead><tr><th class="rowh grp" rowspan="2" style="vertical-align:bottom">Data and measures</th><th class="grp a10 split" colspan="${r10.length}">Article 10 risks</th><th class="grp a14 split" colspan="${r14.length}">Article 14 risks</th></tr><tr>`;
+  html += cols.map((r, i) => `<th class="colh ${i === 0 || i === r10.length ? "split" : ""}" data-col="${r.id}">${chip(r.id)}</th>`).join("") + `</tr></thead><tbody>`;
+  const rowHtml = (item, kind, first) => `<tr class="mx-row r-${kind}${first ? " sep" : ""}" data-row="${item.id}"><th class="rowh">${chip(item.id)}${esc(item.name || item.title)}</th>` +
+    cols.map((r, i) => {
+      const on = kind === "D" ? r.data.includes(item.id) : item.ans.includes(r.id);
+      return `<td class="${i === 0 || i === r10.length ? "split" : ""}" data-col="${r.id}">${on ? `<i class="dot" title="${item.id} ↔ ${r.id}"></i>` : ""}</td>`;
+    }).join("") + `</tr>`;
+  html += DATA.map((d) => rowHtml(d, "D", false)).join("");
+  html += MEASURES.map((m, i) => rowHtml(m, "M", i === 0)).join("");
+  html += `</tbody>`;
+  document.getElementById("mx").innerHTML = html;
+
+  // Sources
+  document.getElementById("src-grid").innerHTML = SOURCES.map((g) => `<div class="src-col"><h3>${esc(g.h)}</h3><ul>${g.items.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a><span class="dom">${dom(u)}</span></li>`).join("")}</ul></div>`).join("") +
+    `<div class="src-col"><h3>Source document</h3><ul><li><a href="https://claude.ai/artifact/YQkkzCHewnrutZDU41JdtW" target="_blank" rel="noopener">Patient Monitoring Data – UK &amp; EU Research (EU AI Act Art 10 &amp; 14)</a><span class="dom">claude.ai</span></li></ul></div>`;
+
+  // Tracing
+  function related(id) {
+    const set = new Set([id]);
+    const t = typeOf(id);
+    if (t === "D") {
+      RISKS.filter((r) => r.data.includes(id)).forEach((r) => { set.add(r.id); MEASURES.filter((m) => m.ans.includes(r.id)).forEach((m) => set.add(m.id)); });
+    } else if (t === "M") {
+      ALL[id].ans.forEach((rid) => { set.add(rid); ALL[rid].data.forEach((d) => set.add(d)); });
+    } else {
+      ALL[id].data.forEach((d) => set.add(d));
+      MEASURES.filter((m) => m.ans.includes(id)).forEach((m) => set.add(m.id));
+    }
+    return set;
+  }
+  const bar = document.getElementById("tracebar");
+  function trace(id) {
+    if (!ALL[id]) return;
+    const set = related(id);
+    document.body.classList.add("tracing");
+    document.querySelectorAll(".card").forEach((c) => {
+      c.classList.toggle("hit", set.has(c.dataset.id));
+      c.classList.toggle("sel", c.dataset.id === id);
+    });
+    document.querySelectorAll("tr.mx-row").forEach((tr) => tr.classList.toggle("hit", set.has(tr.dataset.row)));
+    document.querySelectorAll("th.colh").forEach((th) => th.classList.toggle("hit", set.has(th.dataset.col)));
+    const item = ALL[id];
+    const label = item.name || item.title || item.text;
+    document.getElementById("trace-what").innerHTML = `Tracing ${chip(id)} <span style="font-weight:400">${esc(label.length > 70 ? label.slice(0, 68) + "…" : label)}</span>`;
+    const ids = [...set].filter((x) => x !== id);
+    const group = (t, name) => { const g = ids.filter((x) => typeOf(x) === t); return g.length ? `<span class="grp">${name}: ${g.map(chip).join("")}</span>` : ""; };
+    document.getElementById("trace-groups").innerHTML = group("D", "Data") + group("R10", "Art 10") + group("R14", "Art 14") + group("M", "Measures");
+    bar.hidden = false;
+  }
+  function clearTrace() {
+    document.body.classList.remove("tracing");
+    document.querySelectorAll(".hit, .sel").forEach((e) => e.classList.remove("hit", "sel"));
+    bar.hidden = true;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-trace]");
+    if (!b) return;
+    const id = b.dataset.trace;
+    const inBar = !!b.closest("#tracebar");
+    trace(id);
+    if (inBar) { const el = document.getElementById(id); if (el) el.scrollIntoView({ block: "center" }); }
+  });
+  document.getElementById("trace-clear").addEventListener("click", clearTrace);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") clearTrace(); });
+})();
+</script>
+
+</body></html>
